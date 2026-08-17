@@ -1,0 +1,726 @@
+{% extends "administration/admin_home.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block page_heading %}Manage Users{% endblock %}
+{% block page_subtitle %}View, monitor and manage registered platform users.{% endblock %}
+
+{% block body %}
+
+<style>
+    .users-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* ===== TOP BAR ===== */
+    .users-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 240px;
+        max-width: 520px;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, .55);
+        font-size: .95rem;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 52px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, .10);
+        background: rgba(255, 255, 255, .07);
+        color: #fff;
+        padding: 0 16px 0 44px;
+        outline: none;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        transition: .25s ease;
+        font-size: .95rem;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, .45);
+    }
+
+    .search-input:focus {
+        border-color: rgba(124, 92, 255, .55);
+        box-shadow: 0 0 0 4px rgba(124, 92, 255, .12);
+        background: rgba(255, 255, 255, .09);
+    }
+
+    /* ===== BADGE ===== */
+    .users-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        color: #fff;
+        font-weight: 700;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        white-space: nowrap;
+        min-width: 250px;
+        min-height: 56px;
+    }
+
+    .users-badge .count {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #ff5f6d, #7c5cff);
+        box-shadow: 0 10px 20px rgba(124, 92, 255, .25);
+        font-size: 1rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    /* ===== TABLE CARD ===== */
+    .users-table-card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .05));
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 24px;
+        padding: 18px;
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, .22);
+        overflow: hidden;
+    }
+
+    .table-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 4px 4px 10px;
+    }
+
+    .table-headline h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .table-headline p {
+        margin: 0;
+        color: rgba(255, 255, 255, .58);
+        font-size: .88rem;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 560px;
+        padding-right: 4px;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, .18);
+        border-radius: 999px;
+    }
+
+    .custom-table {
+        width: 100%;
+        min-width: 920px;
+        border-collapse: separate !important;
+        border-spacing: 0 14px !important;
+        background: transparent !important;
+        margin: 0;
+    }
+
+    /* ===== HEADER FIX ===== */
+    .custom-table thead th {
+        background: transparent !important;
+        border: none !important;
+        color: rgba(255, 255, 255, .72) !important;
+        font-weight: 700;
+        padding: 12px 18px;
+        font-size: .82rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    /* ===== BODY ROWS ===== */
+    .custom-table tbody tr td {
+        background: rgba(255, 255, 255, .07);
+        padding: 18px 18px;
+        transition: .25s ease;
+        border: none !important;
+        vertical-align: middle;
+        color: #ffffff !important;
+    }
+
+    .custom-table tbody tr:hover td {
+        background: rgba(255, 255, 255, .11);
+        transform: translateY(-1px);
+    }
+
+    .custom-table tbody tr td:first-child {
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+        text-align: center;
+        width: 70px;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .custom-table tbody tr td:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+
+    /* ===== COLUMN WIDTHS / ALIGNMENT ===== */
+    .custom-table th:nth-child(1),
+    .custom-table td:nth-child(1) {
+        width: 70px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(2),
+    .custom-table td:nth-child(2) {
+        min-width: 240px;
+    }
+
+    .custom-table th:nth-child(3),
+    .custom-table td:nth-child(3) {
+        width: 120px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(4),
+    .custom-table td:nth-child(4) {
+        width: 140px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(5),
+    .custom-table td:nth-child(5) {
+        min-width: 260px;
+    }
+
+    .custom-table th:nth-child(6),
+    .custom-table td:nth-child(6) {
+        width: 180px;
+        text-align: center;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 220px;
+    }
+
+    .user-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(255, 95, 109, .95), rgba(124, 92, 255, .95));
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 10px 22px rgba(124, 92, 255, .22);
+        flex-shrink: 0;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: .98rem;
+        margin-bottom: 2px;
+    }
+
+    .user-sub {
+        color: rgba(255, 255, 255, .52);
+        font-size: .82rem;
+    }
+
+    .info-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        min-width: 74px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .08);
+        color: rgba(255, 255, 255, .88);
+        font-size: .86rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .email-text {
+        color: rgba(255, 255, 255, .88);
+        font-size: .92rem;
+        word-break: break-word;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ff4e50, #ff6a6a);
+        border: none;
+        padding: 10px 16px;
+        border-radius: 12px;
+        color: white !important;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: .25s;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 22px rgba(255, 78, 80, .18);
+        min-width: 118px;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #ff3437, #ff5b5b);
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(255, 0, 0, .25);
+        color: #fff !important;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: rgba(255, 255, 255, .78);
+    }
+
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        font-size: 1.4rem;
+        color: #fff;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: rgba(255, 255, 255, .55);
+    }
+
+    /* ===== MOBILE CARDS ===== */
+    .mobile-users {
+        display: none;
+        gap: 14px;
+        flex-direction: column;
+    }
+
+    .mobile-user-card {
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 22px;
+        padding: 16px;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .18);
+    }
+
+    .mobile-user-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .mobile-user-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mobile-serial {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .10);
+        color: #fff;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .mobile-user-details {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .mobile-info-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, .06);
+        padding-bottom: 10px;
+    }
+
+    .mobile-info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .mobile-label {
+        color: rgba(255, 255, 255, .52);
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mobile-value {
+        color: #fff;
+        font-size: .92rem;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+        max-width: 68%;
+    }
+
+    .mobile-user-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (min-width: 1400px) {
+        .search-wrap {
+            max-width: 560px;
+        }
+
+        .users-badge {
+            min-width: 280px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .custom-table {
+            min-width: 860px;
+        }
+
+        .users-badge {
+            min-width: 230px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .desktop-users {
+            display: none;
+        }
+
+        .mobile-users {
+            display: flex;
+        }
+
+        .users-table-card {
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .users-topbar {
+            gap: 12px;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+            min-width: 100%;
+        }
+
+        .users-badge {
+            width: 100%;
+            min-width: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .users-shell {
+            gap: 14px;
+        }
+
+        .search-input {
+            height: 46px;
+            border-radius: 14px;
+            font-size: .9rem;
+        }
+
+        .users-badge {
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-size: .92rem;
+            min-height: 52px;
+        }
+
+        .users-badge .count {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            font-size: .92rem;
+        }
+
+        .table-headline {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .mobile-user-card {
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+        }
+
+        .user-name {
+            font-size: .94rem;
+        }
+
+        .user-sub {
+            font-size: .78rem;
+        }
+
+        .mobile-label {
+            font-size: .72rem;
+        }
+
+        .mobile-value {
+            font-size: .88rem;
+        }
+
+        .btn-delete {
+            width: 100%;
+            justify-content: center;
+            border-radius: 12px;
+            padding: 11px 14px;
+        }
+
+        .mobile-user-actions {
+            justify-content: stretch;
+        }
+    }
+</style>
+
+<div class="users-shell">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="users-topbar">
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" id="userSearch"
+                placeholder="Search users by name, email, gender...">
+        </div>
+
+        <div class="users-badge">
+            <span>Total Registered Users</span>
+            <span class="count" id="userCount">{{ user|length }}</span>
+        </div>
+    </div>
+
+    <!-- ===== USERS CONTAINER ===== -->
+    <div class="users-table-card">
+        <div class="table-headline">
+            <div>
+                <h3>User Directory</h3>
+                <p>Manage all registered SignBridge users from one place.</p>
+            </div>
+        </div>
+
+        <!-- ===== DESKTOP / TABLET TABLE ===== -->
+        <div class="desktop-users">
+            <div class="table-scroll">
+                <table class="table custom-table mb-0" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>User</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Email ID</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for i in user %}
+                        <tr class="user-row">
+
+                            <td>{{ forloop.counter }}</td>
+
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="user-name">{{ i.name }}</div>
+                                        <div class="user-sub">Registered User</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td><span class="info-pill">{{ i.age }}</span></td>
+                            <td><span class="info-pill">{{ i.gender }}</span></td>
+                            <td><span class="email-text">{{ i.email }}</span></td>
+
+                            <td class="text-center">
+                                <a href="/Deleteuser/{{i.id}}"
+                                   onclick="return confirm('Are you sure you want to delete this user?')"
+                                   class="btn-delete text-decoration-none">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr id="desktopEmptyRow">
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fa-solid fa-users-slash"></i>
+                                    </div>
+                                    <h4>No users found</h4>
+                                    <p>No users are currently registered in the system.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== MOBILE CARDS ===== -->
+        <div class="mobile-users" id="mobileUsers">
+            {% for i in user %}
+            <div class="mobile-user-card user-card">
+                <div class="mobile-user-top">
+                    <div class="mobile-user-left">
+                        <div class="mobile-serial">{{ forloop.counter }}</div>
+                        <div class="user-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="user-name">{{ i.name }}</div>
+                            <div class="user-sub">Registered User</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-user-details">
+                    <div class="mobile-info-row">
+                        <span class="mobile-label">Age</span>
+                        <span class="mobile-value">{{ i.age }}</span>
+                    </div>
+
+                    <div class="mobile-info-row">
+                        <span class="mobile-label">Gender</span>
+                        <span class="mobile-value">{{ i.gender }}</span>
+                    </div>
+
+                    <div class="mobile-info-row">
+                        <span class="mobile-label">Email</span>
+                        <span class="mobile-value">{{ i.email }}</span>
+                    </div>
+                </div>
+
+                <div class="mobile-user-actions">
+                    <a href="/Deleteuser/{{i.id}}"
+                        onclick="return confirm('Are you sure you want to delete this user?')"
+                        class="btn-delete text-decoration-none">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-users-slash"></i>
+                </div>
+                <h4>No users found</h4>
+                <p>No users are currently registered in the system.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const userSearch = document.getElementById("userSearch");
+    const desktopRows = document.querySelectorAll(".user-row");
+    const mobileCards = document.querySelectorAll(".user-card");
+    const userCount = document.getElementById("userCount");
+
+    userSearch.addEventListener("input", function () {
+        const value = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        desktopRows.forEach((row) => {
+            const text = row.innerText.toLowerCase();
+            const show = text.includes(value);
+            row.style.display = show ? "" : "none";
+            if (show) visibleCount++;
+        });
+
+        mobileCards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const show = text.includes(value);
+            card.style.display = show ? "" : "none";
+        });
+
+        userCount.textContent = visibleCount;
+    });
+</script>
+
+{% endblock %}

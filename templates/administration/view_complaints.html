@@ -1,0 +1,1190 @@
+{% extends "administration/admin_home.html" %}
+{% block title %}View Complaints{% endblock %}
+
+{% block page_heading %}Complaints Center{% endblock %}
+{% block page_subtitle %}Track, review and resolve user complaints efficiently.{% endblock %}
+
+{% block body %}
+
+<style>
+    .complaints-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* ===== TOPBAR ===== */
+    .complaints-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 240px;
+        max-width: 520px;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, .55);
+        font-size: .95rem;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 52px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, .10);
+        background: rgba(255, 255, 255, .07);
+        color: #fff;
+        padding: 0 16px 0 44px;
+        outline: none;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        transition: .25s ease;
+        font-size: .95rem;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, .45);
+    }
+
+    .search-input:focus {
+        border-color: rgba(124, 92, 255, .55);
+        box-shadow: 0 0 0 4px rgba(124, 92, 255, .12);
+        background: rgba(255, 255, 255, .09);
+    }
+
+    /* ===== BADGE (MATCHED WITH MANAGE USER) ===== */
+    .complaint-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        color: #fff;
+        font-weight: 700;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        white-space: nowrap;
+        min-width: 220px;
+        min-height: 56px;
+    }
+
+    .complaint-badge .count {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #ff5f6d, #7c5cff);
+        box-shadow: 0 10px 20px rgba(124, 92, 255, .25);
+        font-size: 1rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    /* ===== TABLE WRAP ===== */
+    .complaints-card {
+        background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .05));
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 24px;
+        padding: 18px;
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, .22);
+        overflow: hidden;
+    }
+
+    .table-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 4px 4px 10px;
+    }
+
+    .table-headline h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .table-headline p {
+        margin: 0;
+        color: rgba(255, 255, 255, .58);
+        font-size: .88rem;
+    }
+
+  .table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-right: 0;
+}
+
+.table-scroll::-webkit-scrollbar {
+    height: 7px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .18);
+    border-radius: 999px;
+}
+    .custom-table {
+    width: 100%;
+    min-width: 1080px;
+    border-collapse: separate !important;
+    border-spacing: 0 14px !important;
+    background: transparent !important;
+    margin: 0;
+}
+
+    .custom-table thead th {
+        background: transparent !important;
+        border: none !important;
+        color: rgba(255, 255, 255, .72) !important;
+        font-weight: 700;
+        padding: 12px 18px;
+        font-size: .82rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .custom-table tbody tr.data-row td {
+        background: rgba(255, 255, 255, .07);
+        padding: 18px 18px;
+        transition: .25s ease;
+        border: none !important;
+        vertical-align: middle;
+        color: #ffffff !important;
+    }
+
+    .custom-table tbody tr.data-row:hover td {
+        background: rgba(255, 255, 255, .11);
+        transform: translateY(-1px);
+    }
+
+    .custom-table tbody tr.data-row td:first-child {
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+        text-align: center;
+        width: 70px;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .custom-table tbody tr.data-row td:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+
+    /* ===== COLUMN ALIGNMENT ===== */
+    .custom-table th:nth-child(1),
+    .custom-table td:nth-child(1) {
+        width: 70px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(2),
+    .custom-table td:nth-child(2) {
+        min-width: 230px;
+    }
+
+    .custom-table th:nth-child(3),
+    .custom-table td:nth-child(3) {
+        min-width: 320px;
+    }
+
+    .custom-table th:nth-child(4),
+    .custom-table td:nth-child(4) {
+        width: 170px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(5),
+    .custom-table td:nth-child(5) {
+        width: 140px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(6),
+    .custom-table td:nth-child(6) {
+        min-width: 220px;
+    }
+
+    .custom-table th:nth-child(7),
+    .custom-table td:nth-child(7) {
+        width: 210px;
+        text-align: center;
+    }
+
+    .sender-cell {
+        min-width: 180px;
+    }
+
+    .sender-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* ===== AVATAR MATCHED WITH MANAGE USER ===== */
+    .sender-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(255, 95, 109, .95), rgba(124, 92, 255, .95));
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 10px 22px rgba(124, 92, 255, .22);
+        flex-shrink: 0;
+    }
+
+    .sender-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: .96rem;
+        margin-bottom: 2px;
+    }
+
+    .sender-sub {
+        color: rgba(255, 255, 255, .52);
+        font-size: .82rem;
+    }
+
+    .complaint-text {
+        min-width: 250px;
+        max-width: 360px;
+        color: rgba(255, 255, 255, .9);
+        line-height: 1.55;
+        word-break: break-word;
+    }
+
+    .date-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        min-width: 138px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .08);
+        color: rgba(255, 255, 255, .88);
+        font-size: .86rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 94px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: .82rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-replied {
+        background: rgba(0, 220, 150, .18);
+        color: #7ff0c0;
+        border: 1px solid rgba(0, 220, 150, .15);
+    }
+
+    .status-pending {
+        background: rgba(255, 193, 7, .14);
+        color: #ffe082;
+        border: 1px solid rgba(255, 193, 7, .12);
+    }
+
+    .reply-text {
+        min-width: 220px;
+        max-width: 320px;
+        color: rgba(255, 255, 255, .9);
+        line-height: 1.55;
+        word-break: break-word;
+    }
+
+    .reply-empty {
+        color: rgba(255,255,255,.45);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-reply-toggle,
+    .btn-delete,
+    .btn-send,
+    .btn-cancel {
+        border: none;
+        border-radius: 12px;
+        color: #fff !important;
+        font-size: .88rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: .25s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-reply-toggle {
+        background: linear-gradient(135deg, #b56d8d, #7568d8);
+        padding: 10px 16px;
+        box-shadow: 0 10px 22px rgba(117, 104, 216, 0.16);
+        min-width: 108px;
+    }
+
+    .btn-reply-toggle:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #bf7695, #7d70de);
+        box-shadow: 0 14px 28px rgba(117, 104, 216, 0.22);
+    }
+
+    .btn-send {
+        background: linear-gradient(135deg, #be6f8f, #7a6be6);
+        padding: 11px 18px;
+        box-shadow: 0 10px 24px rgba(122, 107, 230, 0.18);
+        min-width: 130px;
+    }
+
+    .btn-send:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #c97897, #8574eb);
+        box-shadow: 0 14px 30px rgba(122, 107, 230, 0.24);
+    }
+
+    .btn-cancel {
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.10);
+        padding: 11px 18px;
+        min-width: 110px;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255,255,255,.12);
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ff4e50, #ff6a6a);
+        padding: 10px 16px;
+        box-shadow: 0 10px 22px rgba(255, 78, 80, .18);
+        min-width: 108px;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(255, 0, 0, .25);
+    }
+
+    .action-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* ===== INLINE REPLY ROW ANIMATION ===== */
+    .reply-row {
+        display: none;
+    }
+
+    .reply-row.show,
+    .reply-row.closing {
+        display: table-row;
+    }
+
+    .reply-row td {
+        padding: 0 0 4px 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .reply-panel {
+        margin-top: -6px;
+        margin-left: 14px;
+        margin-right: 14px;
+        margin-bottom: 6px;
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 18px;
+        padding: 16px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transform-origin: top center;
+        box-shadow: 0 14px 30px rgba(0,0,0,.12);
+    }
+
+    .reply-row.show .reply-panel {
+        animation: replyPanelIn .38s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    .reply-row.show .reply-box {
+        animation: replyBoxIn .45s ease .10s forwards;
+    }
+
+    .reply-row.show .reply-actions {
+        animation: replyButtonIn .45s ease .16s forwards;
+    }
+
+    .reply-row.closing .reply-panel {
+        animation: replyPanelOut .32s cubic-bezier(.4,0,.2,1) forwards;
+    }
+
+    .reply-row.closing .reply-box {
+        animation: replyBoxOut .22s ease forwards;
+    }
+
+    .reply-row.closing .reply-actions {
+        animation: replyButtonOut .22s ease forwards;
+    }
+
+    .reply-panel-title {
+        font-size: .95rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+        letter-spacing: -.01em;
+    }
+
+    .reply-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .reply-box {
+        width: 100%;
+        min-height: 110px;
+        border: none;
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        resize: vertical;
+        outline: none;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.5;
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    .reply-box::placeholder {
+        color: rgba(255,255,255,.45);
+    }
+
+    .reply-box:focus {
+        background: rgba(255,255,255,.12);
+        box-shadow: 0 0 0 3px rgba(124,92,255,.16), 0 0 18px rgba(124,92,255,.10);
+        transition: .25s ease;
+    }
+
+    .reply-box::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .reply-box::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.18);
+        border-radius: 999px;
+    }
+
+    .reply-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes replyPanelIn {
+        0% {
+            opacity: 0;
+            transform: translateY(-18px) scale(.98);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes replyPanelOut {
+        0% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-12px) scale(.985);
+        }
+    }
+
+    @keyframes replyBoxIn {
+        0% {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes replyBoxOut {
+        0% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+    }
+
+    @keyframes replyButtonIn {
+        0% {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes replyButtonOut {
+        0% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+    }
+
+    /* ===== EMPTY ===== */
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: rgba(255, 255, 255, .78);
+    }
+
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        font-size: 1.4rem;
+        color: #fff;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: rgba(255, 255, 255, .55);
+    }
+
+    /* ===== MOBILE CARDS ===== */
+    .mobile-complaints {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .mobile-card {
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 22px;
+        padding: 16px;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .18);
+    }
+
+    .mobile-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .mobile-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mobile-serial {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.10);
+        color: #fff;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .mobile-details {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .mobile-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(255, 255, 255, .06);
+        padding-bottom: 10px;
+    }
+
+    .mobile-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .mobile-label {
+        color: rgba(255, 255, 255, .52);
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mobile-value {
+        color: #fff;
+        font-size: .92rem;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+        max-width: 68%;
+    }
+
+    .mobile-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+
+    .mobile-actions .btn-delete,
+    .mobile-actions .btn-send,
+    .mobile-actions .btn-reply-toggle,
+    .mobile-actions .btn-cancel {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .mobile-reply-form {
+        margin-top: 14px;
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        animation: replyPanelIn .35s ease;
+    }
+
+    .mobile-reply-form.show {
+        display: flex;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (min-width: 1400px) {
+        .search-wrap {
+            max-width: 560px;
+        }
+
+        .complaint-badge {
+            min-width: 250px;
+        }
+    }
+
+   @media (max-width: 991.98px) {
+    .custom-table {
+        min-width: 980px;
+    }
+
+    .complaint-badge {
+        min-width: 220px;
+    }
+}
+
+    @media (max-width: 767.98px) {
+        .desktop-complaints {
+            display: none;
+        }
+
+        .mobile-complaints {
+            display: flex;
+        }
+
+        .complaints-card {
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .complaints-topbar {
+            gap: 12px;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+            min-width: 100%;
+        }
+
+        .complaint-badge {
+            width: 100%;
+            min-width: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .complaints-shell {
+            gap: 14px;
+        }
+
+        .search-input {
+            height: 46px;
+            border-radius: 14px;
+            font-size: .9rem;
+        }
+
+        .complaint-badge {
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-size: .92rem;
+            min-height: 52px;
+        }
+
+        .complaint-badge .count {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            font-size: .92rem;
+        }
+
+        .table-headline {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .mobile-card {
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .sender-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+        }
+
+        .sender-name {
+            font-size: .94rem;
+        }
+
+        .sender-sub {
+            font-size: .78rem;
+        }
+
+        .mobile-label {
+            font-size: .72rem;
+        }
+
+        .mobile-value {
+            font-size: .88rem;
+        }
+
+        .reply-box {
+            min-height: 96px;
+        }
+
+        .mobile-actions {
+            flex-direction: column;
+        }
+
+        .mobile-actions .btn-delete,
+        .mobile-actions .btn-send,
+        .mobile-actions .btn-reply-toggle,
+        .mobile-actions .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="complaints-shell">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="complaints-topbar">
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" id="complaintSearch"
+                placeholder="Search complaints, users, dates...">
+        </div>
+
+        <div class="complaint-badge">
+            <span>Total Complaints</span>
+            <span class="count" id="complaintCount">{{ complaint|length }}</span>
+        </div>
+    </div>
+
+    <!-- ===== TABLE CARD ===== -->
+    <div class="complaints-card">
+        <div class="table-headline">
+            <div>
+                <h3>Complaint Directory</h3>
+                <p>Review user complaints and respond in a clean workflow.</p>
+            </div>
+        </div>
+
+        <!-- ===== DESKTOP / TABLET ===== -->
+        <div class="desktop-complaints">
+            <div class="table-scroll">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>User</th>
+                            <th>Complaint</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Reply</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="desktopComplaintBody">
+                        {% for i in complaint %}
+                        <tr class="data-row complaint-item">
+                            <td>{{ forloop.counter }}</td>
+
+                            <td class="sender-cell">
+                                <div class="sender-box">
+                                    <div class="sender-avatar">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="sender-name">{{ i.USERID.name }}</div>
+                                        <div class="sender-sub">Registered User</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="complaint-text">{{ i.complaint }}</div>
+                            </td>
+
+                            <td>
+                                <span class="date-pill">{{ i.date }}</span>
+                            </td>
+
+                            <td>
+                                {% if i.reply %}
+                                <span class="status-badge status-replied">Replied</span>
+                                {% else %}
+                                <span class="status-badge status-pending">Pending</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if i.reply %}
+                                <div class="reply-text">{{ i.reply }}</div>
+                                {% else %}
+                                <span class="reply-empty">Awaiting reply</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="action-wrap">
+                                    {% if not i.reply %}
+                                    <button type="button" class="btn-reply-toggle" onclick="toggleReplyRow('{{ i.id }}')">
+                                        <i class="fa-solid fa-reply"></i>
+                                        Reply
+                                    </button>
+                                    {% endif %}
+
+                                    <a href="/Deletecomplaint/{{i.id}}"
+                                        onclick="return confirm('Are you sure you want to delete this complaint?')"
+                                        class="btn-delete text-decoration-none">
+                                        <i class="fa-solid fa-trash"></i>
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% if not i.reply %}
+                        <tr class="reply-row" id="replyRow{{ i.id }}">
+                            <td colspan="7">
+                                <div class="reply-panel">
+                                    <div class="reply-panel-title">Reply to {{ i.USERID.name }}</div>
+                                    <form method="post" action="/ReplyView/{{i.id}}" class="reply-form">
+                                        {% csrf_token %}
+                                        <textarea name="reply" class="reply-box"
+                                            placeholder="Type your reply here..."></textarea>
+
+                                        <div class="reply-actions">
+                                            <button type="button" class="btn-cancel" onclick="toggleReplyRow('{{ i.id }}')">
+                                                <i class="fa-solid fa-xmark"></i>
+                                                Cancel
+                                            </button>
+
+                                            <button type="submit" class="btn-send">
+                                                <i class="fa-solid fa-paper-plane"></i>
+                                                Send Reply
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    </div>
+                                    <h4>No complaints found</h4>
+                                    <p>No complaints are currently available in the system.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== MOBILE CARDS ===== -->
+        <div class="mobile-complaints" id="mobileComplaints">
+            {% for i in complaint %}
+            <div class="mobile-card complaint-card">
+                <div class="mobile-top">
+                    <div class="mobile-user">
+                        <div class="mobile-serial">{{ forloop.counter }}</div>
+
+                        <div class="sender-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="sender-name">{{ i.USERID.name }}</div>
+                            <div class="sender-sub">Registered User</div>
+                        </div>
+                    </div>
+
+                    {% if i.reply %}
+                    <span class="status-badge status-replied">Replied</span>
+                    {% else %}
+                    <span class="status-badge status-pending">Pending</span>
+                    {% endif %}
+                </div>
+
+                <div class="mobile-details">
+                    <div class="mobile-row">
+                        <span class="mobile-label">Complaint</span>
+                        <span class="mobile-value">{{ i.complaint }}</span>
+                    </div>
+
+                    <div class="mobile-row">
+                        <span class="mobile-label">Date</span>
+                        <span class="mobile-value">{{ i.date }}</span>
+                    </div>
+
+                    <div class="mobile-row">
+                        <span class="mobile-label">Reply</span>
+                        <span class="mobile-value">
+                            {% if i.reply %}
+                            {{ i.reply }}
+                            {% else %}
+                            Awaiting reply
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                {% if not i.reply %}
+                <div class="mobile-actions">
+                    <button type="button" class="btn-reply-toggle" onclick="toggleMobileReply('{{ i.id }}')">
+                        <i class="fa-solid fa-reply"></i>
+                        Reply
+                    </button>
+
+                    <a href="/Deletecomplaint/{{i.id}}"
+                        onclick="return confirm('Are you sure you want to delete this complaint?')"
+                        class="btn-delete text-decoration-none">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </a>
+                </div>
+
+                <form method="post" action="/ReplyView/{{i.id}}" class="mobile-reply-form" id="mobileReply{{ i.id }}">
+                    {% csrf_token %}
+                    <textarea name="reply" class="reply-box" placeholder="Type your reply here..."></textarea>
+
+                    <div class="mobile-actions">
+                        <button type="button" class="btn-cancel" onclick="toggleMobileReply('{{ i.id }}')">
+                            <i class="fa-solid fa-xmark"></i>
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn-send">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            Send Reply
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="mobile-actions">
+                    <a href="/Deletecomplaint/{{i.id}}"
+                        onclick="return confirm('Are you sure you want to delete this complaint?')"
+                        class="btn-delete text-decoration-none">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <h4>No complaints found</h4>
+                <p>No complaints are currently available in the system.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const complaintSearch = document.getElementById("complaintSearch");
+    const desktopComplaintRows = document.querySelectorAll(".data-row");
+    const mobileComplaintCards = document.querySelectorAll(".complaint-card");
+    const complaintCount = document.getElementById("complaintCount");
+
+    complaintSearch.addEventListener("input", function () {
+        const value = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        desktopComplaintRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const show = text.includes(value);
+            row.style.display = show ? "" : "none";
+            if (show) visibleCount++;
+
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains("reply-row")) {
+                if (!show) {
+                    nextRow.classList.remove("show", "closing");
+                    nextRow.style.display = "none";
+                } else {
+                    nextRow.style.display = "";
+                }
+            }
+        });
+
+        mobileComplaintCards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const show = text.includes(value);
+            card.style.display = show ? "" : "none";
+        });
+
+        complaintCount.textContent = visibleCount;
+    });
+
+    function toggleReplyRow(id) {
+        const row = document.getElementById("replyRow" + id);
+        if (!row) return;
+
+        const allRows = document.querySelectorAll(".reply-row");
+
+        allRows.forEach(r => {
+            if (r !== row && r.classList.contains("show")) {
+                r.classList.remove("show");
+                r.classList.add("closing");
+
+                setTimeout(() => {
+                    r.classList.remove("closing");
+                }, 320);
+            }
+        });
+
+        if (row.classList.contains("show")) {
+            row.classList.remove("show");
+            row.classList.add("closing");
+
+            setTimeout(() => {
+                row.classList.remove("closing");
+            }, 320);
+        } else {
+            row.classList.remove("closing");
+            row.classList.add("show");
+
+            setTimeout(() => {
+                const textarea = row.querySelector(".reply-box");
+                if (textarea) textarea.focus();
+            }, 220);
+        }
+    }
+
+    function toggleMobileReply(id) {
+        const form = document.getElementById("mobileReply" + id);
+        if (!form) return;
+
+        document.querySelectorAll(".mobile-reply-form.show").forEach(item => {
+            if (item !== form) item.classList.remove("show");
+        });
+
+        form.classList.toggle("show");
+
+        if (form.classList.contains("show")) {
+            setTimeout(() => {
+                const textarea = form.querySelector(".reply-box");
+                if (textarea) textarea.focus();
+            }, 150);
+        }
+    }
+</script>
+
+{% endblock %}

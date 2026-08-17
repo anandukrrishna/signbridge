@@ -1,0 +1,499 @@
+{% extends "user/user_home.html" %}
+{% block title %}Send Complaint{% endblock %}
+{% block page_heading %}Send Complaint{% endblock %}
+{% block page_subtitle %}Submit your complaint and track admin responses in a clean, organized dashboard view.{% endblock %}
+
+{% block body %}
+
+<style>
+    .complaints-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* ===== FORM CARD ===== */
+    .form-card {
+        background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.10);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
+        border-radius: 26px;
+        padding: 24px 24px;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.05),
+            0 16px 40px rgba(0, 0, 0, .18);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(124, 92, 255, 0.12), transparent 26%),
+            radial-gradient(circle at 85% 80%, rgba(255, 95, 109, 0.10), transparent 24%);
+        pointer-events: none;
+    }
+
+    .form-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-card label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #eef4ff;
+        letter-spacing: 0.01em;
+    }
+
+    .textarea-wrapper {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .textarea-wrapper textarea {
+        width: 100%;
+        min-height: 120px;
+        max-height: 220px;
+        resize: vertical;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        color: white;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        outline: none;
+        transition: .28s ease;
+    }
+
+    .textarea-wrapper textarea::placeholder {
+        color: rgba(255, 255, 255, 0.48);
+    }
+
+    .textarea-wrapper textarea:focus {
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow:
+            0 0 0 3px rgba(124, 92, 255, 0.18),
+            0 10px 24px rgba(0, 0, 0, 0.20);
+    }
+
+    .helper-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .helper-text {
+        font-size: 0.82rem;
+        color: rgba(238, 244, 255, 0.58);
+    }
+
+    .send-area {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-send {
+        min-height: 48px;
+        border: none;
+        border-radius: 14px;
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, #ff5f6d, #7c5cff);
+        box-shadow: 0 14px 28px rgba(124, 92, 255, .24), inset 0 1px 0 rgba(255, 255, 255, .18);
+        transition: .28s ease;
+        position: relative;
+        overflow: hidden;
+        padding: 0 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-send::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent);
+        transform: translateX(-120%);
+        transition: .6s ease;
+    }
+
+    .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(124, 92, 255, .32);
+    }
+
+    .btn-send:hover::before {
+        transform: translateX(120%);
+    }
+
+    /* ===== TABLE CARD ===== */
+    .table-card {
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 28px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .28);
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .table-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 18% 12%, rgba(124, 92, 255, 0.08), transparent 22%),
+            radial-gradient(circle at 85% 80%, rgba(255, 95, 109, 0.10), transparent 26%);
+        pointer-events: none;
+    }
+
+    .table-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .table-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .table-title {
+        margin: 0;
+        font-size: 1.08rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+
+    .table-sub {
+        font-size: 0.84rem;
+        color: rgba(238, 244, 255, 0.62);
+    }
+
+    /* ===== TABLE WRAP ===== */
+    .table-wrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-radius: 20px;
+    }
+
+    .table-wrap::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.22);
+        border-radius: 20px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.38);
+    }
+
+    .custom-table {
+        width: 100%;
+        min-width: 720px;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        color: white;
+    }
+
+    .custom-table thead th {
+        padding: 0 16px 12px;
+        font-weight: 700;
+        color: #d8e1f4;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.9rem;
+        letter-spacing: 0.01em;
+    }
+
+    .custom-table tbody tr td {
+        background: rgba(255, 255, 255, 0.07);
+        padding: 16px 16px;
+        transition: .25s ease;
+        vertical-align: middle;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.92rem;
+        line-height: 1.65;
+        word-break: break-word;
+    }
+
+    .custom-table tbody tr td:first-child {
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+        width: 70px;
+        text-align: center;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .custom-table tbody tr td:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+
+    .custom-table tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.11);
+    }
+
+    .complaint-text {
+        color: rgba(255,255,255,.94);
+    }
+
+    .date-text {
+        color: rgba(238, 244, 255, 0.68);
+        white-space: nowrap;
+    }
+
+    .pending {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(255, 193, 7, 0.12);
+        color: #ffd24d;
+        border: 1px solid rgba(255, 193, 7, 0.18);
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    .reply-text {
+        color: #8BFFC0;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 28px 18px 8px;
+        color: rgba(238, 244, 255, 0.62);
+        font-size: 0.95rem;
+    }
+
+    /* ===== TEXTAREA SCROLLBAR ===== */
+    .textarea-wrapper textarea::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.24);
+        border-radius: 10px;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 991.98px) {
+        .complaints-wrapper {
+            gap: 20px;
+        }
+
+        .form-card,
+        .table-card {
+            padding: 22px;
+            border-radius: 24px;
+        }
+
+        .custom-table {
+            min-width: 680px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .complaints-wrapper {
+            gap: 16px;
+        }
+
+        .form-card,
+        .table-card {
+            padding: 16px 15px;
+            border-radius: 18px;
+        }
+
+        .form-card label {
+            font-size: 0.84rem;
+            margin-bottom: 10px;
+        }
+
+        .textarea-wrapper textarea {
+            min-height: 110px;
+            padding: 14px 14px;
+            border-radius: 16px;
+            font-size: 0.88rem;
+        }
+
+        .helper-row {
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .helper-text {
+            font-size: 0.76rem;
+        }
+
+        .btn-send {
+            min-height: 42px;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: 0.84rem;
+        }
+
+        .table-head {
+            margin-bottom: 14px;
+        }
+
+        .table-title {
+            font-size: 0.98rem;
+        }
+
+        .table-sub {
+            font-size: 0.76rem;
+        }
+
+        .custom-table {
+            min-width: 620px;
+            border-spacing: 0 8px;
+        }
+
+        .custom-table thead th {
+            padding: 0 12px 10px;
+            font-size: 0.82rem;
+        }
+
+        .custom-table tbody tr td {
+            padding: 13px 12px;
+            font-size: 0.84rem;
+        }
+
+        .custom-table tbody tr td:first-child {
+            width: 56px;
+            border-top-left-radius: 14px;
+            border-bottom-left-radius: 14px;
+        }
+
+        .custom-table tbody tr td:last-child {
+            border-top-right-radius: 14px;
+            border-bottom-right-radius: 14px;
+        }
+
+        .pending {
+            font-size: 0.7rem;
+            padding: 6px 10px;
+        }
+    }
+</style>
+
+<div class="complaints-wrapper">
+
+    <!-- ===== Complaint Form ===== -->
+    <div class="form-card animate-in delay-3">
+        <div class="form-card-content">
+            <form method="post" action="/sendcomplaints">
+                {% csrf_token %}
+
+                <label for="complaint">Complaint</label>
+
+                <div class="textarea-wrapper">
+                    <textarea id="complaint" name="complaint" maxlength="250" placeholder="Write your complaint here..."></textarea>
+                </div>
+
+                <div class="helper-row">
+                    <div class="helper-text">Keep it short and clear (max 250 characters).</div>
+
+                    <div class="send-area">
+                        <button type="submit" class="btn-send">
+                            <i class="bi bi-send"></i>
+                            <span>Send</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Complaints Table ===== -->
+    <div class="table-card animate-in delay-4">
+        <div class="table-card-content">
+
+            <div class="table-head">
+                <div>
+                    <h5 class="table-title">Your Complaints & Replies</h5>
+                    <div class="table-sub">Track all submitted complaints and admin responses.</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Complaint</th>
+                            <th>Date</th>
+                            <th>Reply</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for i in complaint %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="complaint-text">{{ i.complaint }}</td>
+                            <td class="date-text">{{ i.date }}</td>
+                            <td>
+                                {% if i.reply %}
+                                <span class="reply-text">{{ i.reply }}</span>
+                                {% else %}
+                                <span class="pending">Pending</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-state">No complaints submitted yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

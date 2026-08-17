@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard | ISL System</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #b3d1ff, #e8f0ff, #d6e4ff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding-bottom: 80px; /* footer space */
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(90deg, #004aad, #007bff, #2a73ff);
+      color: white;
+      text-align: center;
+      padding: 18px 0;
+      font-size: 24px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      z-index: 100;
+    }
+  
+    /* ===== TOP BUTTONS ===== */
+    .top-left, .top-right {
+      position: fixed;
+      top: 18px;
+      display: flex;
+      gap: 10px;
+      z-index: 200;
+    }
+
+    .top-left { left: 20px; }
+    .top-right { right: 20px; }
+
+    .action-btn {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(6px);
+    }
+
+    .action-btn:hover {
+      background: rgba(255,255,255,0.35);
+      transform: translateY(-2px);
+    }
+
+    /* ===== DASHBOARD ===== */
+    .dashboard {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(0, 0, 80, 0.25);
+      text-align: center;
+      width: 90%;
+      max-width: 1000px;
+      margin-top: 120px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== FLOATING HANDS ===== */
+    .hand {
+      position: absolute;
+      width: 60px;
+      opacity: 0.15;
+      animation: floatHand 6s ease-in-out infinite alternate;
+    }
+
+    .hand:nth-child(1) { top: 10%; left: 5%; }
+    .hand:nth-child(2) { bottom: 8%; right: 10%; }
+    .hand:nth-child(3) { top: 60%; left: 80%; }
+
+    @keyframes floatHand {
+      from { transform: translateY(0) rotate(0deg); }
+      to { transform: translateY(-20px) rotate(10deg); }
+    }
+
+    h1 {
+      color: #003366;
+      font-size: 30px;
+      margin-bottom: 30px;
+    }
+
+    /* ===== OPTIONS ===== */
+   .options {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 25px;
+  margin-top: 40px;
+}
+
+
+    .option-card {
+  background: linear-gradient(145deg, #ffffff, #e6ecff);
+  border-radius: 15px;
+  padding: 25px 10px;
+  cursor: pointer;
+  transition: 0.4s;
+  box-shadow: 8px 8px 20px rgba(0,0,60,0.1);
+  width: 100%;
+}
+
+
+    .option-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,60,150,0.25);
+    }
+
+    .option-card span {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .option-card h3 {
+      color: #004aad;
+      font-size: 18px;
+    }
+
+    .option-card p {
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* ===== ISL INFO ===== */
+    .isl-info {
+      margin-top: 60px;
+      background: linear-gradient(135deg, #004aad, #007bff);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: left;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(90deg, #004aad, #007bff);
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 14px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
+    }
+
+    footer a {
+      color: #ffeb3b;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 24px; }
+      .dashboard { padding: 25px; }
+    }
+    /* ===== LOGO AREA (TOP LEFT) ===== */
+.logo-area {
+  position: fixed;
+  top: 1px;
+  left: 10px;
+  z-index: 200;
+}
+
+.logo-area img {
+  height: 150px;
+  width: auto;
+}
+  </style>
+</head>
+
+<body>
+
+ <!-- LOGO (replaces Home icon) -->
+<div class="logo-area">
+  <img src="/media/logo_1.png" alt="Logo">
+</div>
+
+  <!-- TOP RIGHT -->
+  <div class="top-right">
+    <div class="action-btn" onclick="location.href='/changepassword'">🔐 Change Password</div>
+    <div class="action-btn" onclick="location.href='/'">🚪 Logout</div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">👤SIGNIFY</div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard">
+
+    <img src="https://cdn-icons-png.flaticon.com/512/9425/9425711.png" class="hand">
+    <img src="https://cdn-icons-png.flaticon.com/512/9425/9425713.png" class="hand">
+    <img src="https://cdn-icons-png.flaticon.com/512/9425/9425723.png" class="hand">
+
+    <h1>User Dashboard</h1>
+
+    <div class="options">
+      {% comment %} <div class="option-card" style="grid-column: span 3;" onclick="location.href='/detections'"> {% endcomment %}
+      <div class="option-card" style="grid-column: span 3;" onclick="location.href='/isl'">
+        <span>🤚</span>
+        <h3>Gesture Recognition</h3>
+        <p>Use real-time hand gesture recognition.</p>
+      </div>
+
+      
+    
+      <div class="option-card" style="grid-column: span 3;" onclick="location.href='/sign_animation'">
+        <span>✍️</span>
+        <h3>Gesture Generator</h3>
+        <p>Converts text into hand gestures.</p>
+      </div>
+
+    
+{% comment %} 
+      <div class="option-card" style="grid-column: span 2;"onclick="location.href='/feedback'">
+        <span>💬</span>
+        <h3>Feedback</h3>
+        <p>Send your feedback.</p>
+      </div> {% endcomment %}
+
+      <div class="option-card" style="grid-column: span 3;" onclick="location.href='/complaint'">
+        <span>📝</span>
+        <h3>Complaint</h3>
+        <p>Submit your complaints.</p>
+      </div>
+
+      <div class="option-card" style="grid-column: span 3;" onclick="location.href='/viewcompuser'">
+        <span>📄</span>
+        <h3>Your Complaints</h3>
+        <p>View complaint status.</p>
+      </div>
+    </div>
+
+    <div class="isl-info">
+      <h2>About This ISL System</h2>
+      <ul>
+        <li>Real-time Indian Sign Language recognition</li>
+        <li>Malayalam text & audio output</li>
+        <li>Designed for hearing & speech impaired users</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  < footer>
+    {% comment %} © 2025 ISL Gesture Recognition System | Final Year Project <br> {% endcomment %}
+    📧 <a href="mailto:mainpro4673@gmail.com">mainpro4673@gmail.com</a>
+  </footer>
+
+</body>
+</html>  

@@ -1,0 +1,851 @@
+{% extends "administration/admin_home.html" %}
+{% block title %}View Feedback{% endblock %}
+
+{% block page_heading %}Feedback Center{% endblock %}
+{% block page_subtitle %}Review user feedback and monitor overall satisfaction.{% endblock %}
+
+{% block body %}
+
+<style>
+    .feedback-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* ===== TOPBAR ===== */
+    .feedback-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 240px;
+        max-width: 520px;
+    }
+
+    .search-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,.55);
+        font-size: .95rem;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 52px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,.10);
+        background: rgba(255,255,255,.07);
+        color: #fff;
+        padding: 0 16px 0 44px;
+        outline: none;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        transition: .25s ease;
+        font-size: .95rem;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255,255,255,.45);
+    }
+
+    .search-input:focus {
+        border-color: rgba(124,92,255,.55);
+        box-shadow: 0 0 0 4px rgba(124,92,255,.12);
+        background: rgba(255,255,255,.09);
+    }
+
+    .top-stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+
+    .mini-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.10);
+        color: #fff;
+        font-weight: 700;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        white-space: nowrap;
+        min-height: 56px;
+        min-width: 230px;
+    }
+
+    .mini-stat .icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #ff5f6d, #7c5cff);
+        box-shadow: 0 10px 20px rgba(124,92,255,.25);
+        color: #fff;
+        font-size: .95rem;
+        flex-shrink: 0;
+    }
+
+    .mini-stat small {
+        display: block;
+        color: rgba(255,255,255,.55);
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mini-stat strong {
+        display: block;
+        font-size: .98rem;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    /* ===== MAIN CARD ===== */
+    .feedback-card {
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 24px;
+        padding: 18px;
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        box-shadow: 0 20px 50px rgba(0,0,0,.22);
+        overflow: hidden;
+    }
+
+    .table-headline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 4px 4px 10px;
+    }
+
+    .table-headline h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .table-headline p {
+        margin: 0;
+        color: rgba(255,255,255,.58);
+        font-size: .88rem;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-right: 0;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+        height: 7px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.18);
+        border-radius: 999px;
+    }
+
+    .custom-table {
+        width: 100%;
+        min-width: 1040px;
+        border-collapse: separate !important;
+        border-spacing: 0 14px !important;
+        background: transparent !important;
+        margin: 0;
+    }
+
+    .custom-table thead th {
+        background: transparent !important;
+        border: none !important;
+        color: rgba(255,255,255,.72) !important;
+        font-weight: 700;
+        padding: 12px 18px;
+        font-size: .82rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .custom-table tbody tr.feedback-row td {
+        background: rgba(255,255,255,.07);
+        padding: 18px;
+        transition: .25s ease;
+        border: none !important;
+        vertical-align: middle;
+        color: #ffffff !important;
+    }
+
+    .custom-table tbody tr.feedback-row:hover td {
+        background: rgba(255,255,255,.11);
+        transform: translateY(-1px);
+    }
+
+    .custom-table tbody tr.feedback-row td:first-child {
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+        text-align: center;
+        width: 70px;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .custom-table tbody tr.feedback-row td:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+
+    /* ===== COLUMN ALIGNMENT ===== */
+    .custom-table th:nth-child(1),
+    .custom-table td:nth-child(1) {
+        width: 70px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(2),
+    .custom-table td:nth-child(2) {
+        min-width: 240px;
+    }
+
+    .custom-table th:nth-child(3),
+    .custom-table td:nth-child(3) {
+        min-width: 320px;
+    }
+
+    .custom-table th:nth-child(4),
+    .custom-table td:nth-child(4) {
+        width: 180px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(5),
+    .custom-table td:nth-child(5) {
+        width: 170px;
+        text-align: center;
+    }
+
+    .custom-table th:nth-child(6),
+    .custom-table td:nth-child(6) {
+        width: 180px;
+        text-align: center;
+    }
+
+    .sender-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 180px;
+    }
+
+    .sender-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba(255, 95, 109, .95), rgba(124, 92, 255, .95));
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 10px 22px rgba(124, 92, 255, .22);
+        flex-shrink: 0;
+    }
+
+    .sender-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: .96rem;
+        margin-bottom: 2px;
+    }
+
+    .sender-sub {
+        color: rgba(255,255,255,.52);
+        font-size: .82rem;
+    }
+
+    .feedback-text {
+        min-width: 240px;
+        max-width: 360px;
+        color: rgba(255,255,255,.9);
+        line-height: 1.55;
+        word-break: break-word;
+    }
+
+    .date-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        min-width: 138px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.08);
+        color: rgba(255,255,255,.88);
+        font-size: .86rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* ===== STAR RATING ===== */
+    .rating-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-width: 150px;
+        flex-wrap: nowrap;
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 4px;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .rating-stars i {
+        color: rgba(255,255,255,.22);
+    }
+
+    .rating-stars i.active {
+        color: #ffc857;
+        text-shadow: 0 0 10px rgba(255, 200, 87, .18);
+    }
+
+    .rating-pill {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.08);
+        color: rgba(255,255,255,.88);
+        font-size: .82rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    /* ===== DELETE ===== */
+    .btn-delete {
+        background: linear-gradient(135deg, #ff4e50, #ff6a6a);
+        border: none;
+        padding: 10px 16px;
+        border-radius: 12px;
+        color: white !important;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: .25s;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 22px rgba(255, 78, 80, .18);
+        min-width: 108px;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #ff3437, #ff5b5b);
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(255, 0, 0, .25);
+        color: #fff !important;
+    }
+
+    /* ===== EMPTY ===== */
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: rgba(255,255,255,.78);
+    }
+
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.10);
+        font-size: 1.4rem;
+        color: #fff;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        margin: 0;
+        color: rgba(255,255,255,.55);
+    }
+
+    /* ===== MOBILE ===== */
+    .mobile-feedbacks {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .mobile-card {
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 22px;
+        padding: 16px;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 14px 34px rgba(0,0,0,.18);
+    }
+
+    .mobile-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .mobile-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mobile-serial {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.08);
+        border: 1px solid rgba(255,255,255,.10);
+        color: #fff;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .mobile-details {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .mobile-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+        padding-bottom: 10px;
+    }
+
+    .mobile-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .mobile-label {
+        color: rgba(255,255,255,.52);
+        font-size: .78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mobile-value {
+        color: #fff;
+        font-size: .92rem;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+        max-width: 68%;
+    }
+
+    .mobile-actions {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (min-width: 1400px) {
+        .search-wrap {
+            max-width: 560px;
+        }
+
+        .mini-stat {
+            min-width: 240px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .custom-table {
+            min-width: 920px;
+        }
+
+        .mini-stat {
+            min-width: 210px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .desktop-feedbacks {
+            display: none;
+        }
+
+        .mobile-feedbacks {
+            display: flex;
+        }
+
+        .feedback-card {
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .feedback-topbar {
+            gap: 12px;
+        }
+
+        .search-wrap {
+            max-width: 100%;
+            min-width: 100%;
+        }
+
+        .top-stats {
+            width: 100%;
+        }
+
+        .mini-stat {
+            flex: 1;
+            justify-content: flex-start;
+            min-width: calc(50% - 6px);
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .feedback-shell {
+            gap: 14px;
+        }
+
+        .search-input {
+            height: 46px;
+            border-radius: 14px;
+            font-size: .9rem;
+        }
+
+        .mini-stat {
+            width: 100%;
+            min-width: 100%;
+            border-radius: 14px;
+            padding: 10px 14px;
+        }
+
+        .mini-stat .icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+        }
+
+        .table-headline {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .mobile-card {
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .sender-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+        }
+
+        .sender-name {
+            font-size: .94rem;
+        }
+
+        .sender-sub {
+            font-size: .78rem;
+        }
+
+        .mobile-label {
+            font-size: .72rem;
+        }
+
+        .mobile-value {
+            font-size: .88rem;
+        }
+
+        .mobile-actions {
+            justify-content: stretch;
+        }
+
+        .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="feedback-shell">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="feedback-topbar">
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" class="search-input" id="feedbackSearch"
+                placeholder="Search feedback, users, dates...">
+        </div>
+
+        <div class="top-stats">
+            <div class="mini-stat">
+                <div class="icon-box">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                    <small>Total Feedback</small>
+                    <strong id="feedbackCount">{{ feedback|length }}</strong>
+                </div>
+            </div>
+
+            <div class="mini-stat">
+                <div class="icon-box">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div>
+                    <small>Average Rating</small>
+                    <strong id="avgRating">0.0 / 5</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CARD ===== -->
+    <div class="feedback-card">
+        <div class="table-headline">
+            <div>
+                <h3>Feedback Directory</h3>
+                <p>Explore user reviews, ratings and overall experience.</p>
+            </div>
+        </div>
+
+        <!-- ===== DESKTOP / TABLET ===== -->
+        <div class="desktop-feedbacks">
+            <div class="table-scroll">
+                <table class="table custom-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>User</th>
+                            <th>Feedback</th>
+                            <th>Rating</th>
+                            <th>Date</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbackTableBody">
+                        {% for i in feedback %}
+                        <tr class="feedback-row">
+                            <td>{{ forloop.counter }}</td>
+
+                            <td>
+                                <div class="sender-box">
+                                    <div class="sender-avatar">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="sender-name">{{ i.USERID.name }}</div>
+                                        <div class="sender-sub">Registered User</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="feedback-text">{{ i.feedback }}</div>
+                            </td>
+
+                            <td data-rating="{{ i.rating }}">
+                                <div class="rating-wrap">
+                                    <div class="rating-stars">
+                                        {% for _ in "12345"|make_list %}
+                                            {% if forloop.counter <= i.rating %}
+                                                <i class="fa-solid fa-star active"></i>
+                                            {% else %}
+                                                <i class="fa-regular fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <span class="rating-pill">{{ i.rating }}/5</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="date-pill">{{ i.date }}</span>
+                            </td>
+
+                            <td class="text-center">
+                                <a href="/Deletefeedback/{{i.id}}"
+                                   onclick="return confirm('Are you sure you want to delete this feedback?')"
+                                   class="btn-delete text-decoration-none">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fa-solid fa-comment-slash"></i>
+                                    </div>
+                                    <h4>No feedback found</h4>
+                                    <p>No user feedback is currently available in the system.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== MOBILE ===== -->
+        <div class="mobile-feedbacks" id="mobileFeedbacks">
+            {% for i in feedback %}
+            <div class="mobile-card feedback-card-item" data-rating="{{ i.rating }}">
+                <div class="mobile-top">
+                    <div class="mobile-user">
+                        <div class="mobile-serial">{{ forloop.counter }}</div>
+                        <div class="sender-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="sender-name">{{ i.USERID.name }}</div>
+                            <div class="sender-sub">Registered User</div>
+                        </div>
+                    </div>
+
+                    <span class="rating-pill">{{ i.rating }}/5</span>
+                </div>
+
+                <div class="mobile-details">
+                    <div class="mobile-row">
+                        <span class="mobile-label">Feedback</span>
+                        <span class="mobile-value">{{ i.feedback }}</span>
+                    </div>
+
+                    <div class="mobile-row">
+                        <span class="mobile-label">Rating</span>
+                        <span class="mobile-value">
+                            <span class="rating-stars">
+                                {% for _ in "12345"|make_list %}
+                                    {% if forloop.counter <= i.rating %}
+                                        <i class="fa-solid fa-star active"></i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="mobile-row">
+                        <span class="mobile-label">Date</span>
+                        <span class="mobile-value">{{ i.date }}</span>
+                    </div>
+                </div>
+
+                <div class="mobile-actions">
+                    <a href="/Deletefeedback/{{i.id}}"
+                       onclick="return confirm('Are you sure you want to delete this feedback?')"
+                       class="btn-delete text-decoration-none">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Feedback
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-comment-slash"></i>
+                </div>
+                <h4>No feedback found</h4>
+                <p>No user feedback is currently available in the system.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const feedbackSearch = document.getElementById("feedbackSearch");
+    const feedbackRows = document.querySelectorAll(".feedback-row");
+    const feedbackCards = document.querySelectorAll(".feedback-card-item");
+    const feedbackCount = document.getElementById("feedbackCount");
+    const avgRating = document.getElementById("avgRating");
+
+    function updateAverageRating() {
+        let ratings = [];
+
+        document.querySelectorAll(".feedback-row td[data-rating], .feedback-card-item[data-rating]").forEach(el => {
+            const isVisible = el.closest(".feedback-row") ? el.closest(".feedback-row").style.display !== "none" : el.style.display !== "none";
+            const value = parseFloat(el.getAttribute('data-rating'));
+            if (!isNaN(value) && isVisible) ratings.push(value);
+        });
+
+        if (ratings.length > 0) {
+            const avg = (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1);
+            avgRating.textContent = `${avg} / 5`;
+        } else {
+            avgRating.textContent = "0.0 / 5";
+        }
+    }
+
+    feedbackSearch.addEventListener("input", function () {
+        const value = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        feedbackRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const show = text.includes(value);
+            row.style.display = show ? "" : "none";
+            if (show) visibleCount++;
+        });
+
+        feedbackCards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const show = text.includes(value);
+            card.style.display = show ? "" : "none";
+        });
+
+        feedbackCount.textContent = visibleCount;
+        updateAverageRating();
+    });
+
+    updateAverageRating();
+</script>
+
+{% endblock %}

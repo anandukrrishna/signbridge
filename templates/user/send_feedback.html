@@ -1,0 +1,322 @@
+{% extends "user/user_home.html" %}
+{% block title %}Send Feedback{% endblock %}
+{% block page_heading %}Send Feedback{% endblock %}
+{% block page_subtitle %}Share your experience and help improve the SignBridge platform with your feedback and rating.{% endblock %}
+
+{% block body %}
+
+<style>
+    .feedback-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* ===== FEEDBACK CARD ===== */
+    .feedback-card {
+        background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.10);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
+        border-radius: 28px;
+        padding: 28px 28px;
+        color: white;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.05),
+            0 20px 50px rgba(0, 0, 0, .22);
+        position: relative;
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+    }
+
+    .feedback-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(124, 92, 255, 0.12), transparent 26%),
+            radial-gradient(circle at 85% 80%, rgba(255, 95, 109, 0.10), transparent 24%);
+        pointer-events: none;
+    }
+
+    .feedback-card-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .feedback-card label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #eef4ff;
+        letter-spacing: 0.01em;
+    }
+
+    /* ===== TEXTAREA ===== */
+    .textarea-wrapper {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .textarea-wrapper textarea {
+        width: 100%;
+        min-height: 130px;
+        max-height: 220px;
+        resize: vertical;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        color: white;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        outline: none;
+        transition: .28s ease;
+    }
+
+    .textarea-wrapper textarea::placeholder {
+        color: rgba(255, 255, 255, 0.48);
+    }
+
+    .textarea-wrapper textarea:focus {
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow:
+            0 0 0 3px rgba(124, 92, 255, 0.18),
+            0 10px 24px rgba(0, 0, 0, 0.20);
+    }
+
+    .helper-text {
+        margin-top: 10px;
+        font-size: 0.82rem;
+        color: rgba(238, 244, 255, 0.58);
+    }
+
+    /* ===== TEXTAREA SCROLLBAR ===== */
+    .textarea-wrapper textarea::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.24);
+        border-radius: 10px;
+    }
+
+    .textarea-wrapper textarea::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ===== RATING ===== */
+    .rating-section {
+        margin-top: 26px;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .rating input {
+        display: none;
+    }
+
+    .rating label {
+        font-size: 2rem;
+        line-height: 1;
+        color: rgba(255, 255, 255, 0.28);
+        cursor: pointer;
+        transition: .22s ease;
+        margin: 0;
+        user-select: none;
+        text-shadow: 0 0 0 transparent;
+    }
+
+    .rating label:hover,
+    .rating label:hover ~ label {
+        color: #ffc107;
+        transform: translateY(-2px) scale(1.05);
+        text-shadow: 0 0 18px rgba(255, 193, 7, 0.18);
+    }
+
+    .rating input:checked ~ label {
+        color: #ffc107;
+        text-shadow: 0 0 18px rgba(255, 193, 7, 0.18);
+    }
+
+    .rating-hint {
+        margin-top: 10px;
+        font-size: 0.82rem;
+        color: rgba(238, 244, 255, 0.58);
+    }
+
+    /* ===== BUTTON ===== */
+    .submit-area {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 28px;
+    }
+
+    .btn-submit {
+        min-height: 48px;
+        border: none;
+        border-radius: 14px;
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, #ff5f6d, #7c5cff);
+        box-shadow: 0 14px 28px rgba(124, 92, 255, .24), inset 0 1px 0 rgba(255, 255, 255, .18);
+        transition: .28s ease;
+        position: relative;
+        overflow: hidden;
+        padding: 0 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-submit::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .16), transparent);
+        transform: translateX(-120%);
+        transition: .6s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(124, 92, 255, .32);
+    }
+
+    .btn-submit:hover::before {
+        transform: translateX(120%);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 991.98px) {
+        .feedback-card {
+            padding: 24px;
+            border-radius: 24px;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .feedback-wrapper {
+            gap: 16px;
+        }
+
+        .feedback-card {
+            padding: 16px 15px;
+            border-radius: 18px;
+        }
+
+        .feedback-card label {
+            font-size: 0.84rem;
+            margin-bottom: 10px;
+        }
+
+        .textarea-wrapper textarea {
+            min-height: 115px;
+            padding: 14px 14px;
+            border-radius: 16px;
+            font-size: 0.88rem;
+        }
+
+        .helper-text,
+        .rating-hint {
+            font-size: 0.76rem;
+        }
+
+        .rating-section {
+            margin-top: 22px;
+        }
+
+        .rating {
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .rating label {
+            font-size: 1.8rem;
+        }
+
+        .submit-area {
+            margin-top: 22px;
+        }
+
+        .btn-submit {
+            min-height: 42px;
+            border-radius: 12px;
+            padding: 0 16px;
+            font-size: 0.84rem;
+        }
+    }
+</style>
+
+<div class="feedback-wrapper">
+
+    <div class="feedback-card animate-in delay-3">
+        <div class="feedback-card-content">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <label for="feedback">Your Feedback</label>
+
+                <div class="textarea-wrapper">
+                    <textarea id="feedback" name="feedback" maxlength="250" placeholder="Write your feedback here..."></textarea>
+                </div>
+
+                <div class="helper-text">Share your experience clearly (max 250 characters).</div>
+
+                <div class="rating-section">
+                    <label>Rating</label>
+
+                    <div class="rating">
+                        <input type="radio" name="rating" value="5" id="star1">
+                        <label for="star1">★</label>
+
+                        <input type="radio" name="rating" value="4" id="star2">
+                        <label for="star2">★</label>
+
+                        <input type="radio" name="rating" value="3" id="star3">
+                        <label for="star3">★</label>
+
+                        <input type="radio" name="rating" value="2" id="star4">
+                        <label for="star4">★</label>
+
+                        <input type="radio" name="rating" value="1" id="star5">
+                        <label for="star5">★</label>
+                    </div>
+
+                    <div class="rating-hint">Tap a star to rate your experience.</div>
+                </div>
+
+                <div class="submit-area">
+                    <button type="submit" class="btn-submit">
+                        <i class="bi bi-send"></i>
+                        <span>Submit</span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

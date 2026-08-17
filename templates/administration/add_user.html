@@ -1,0 +1,539 @@
+{% extends 'login.html' %}
+
+{% block title %}Sign Up | SignBridge{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+    <div class="auth-card signup-card">
+
+        <div class="premium-brand compact-brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-hands-asl-interpreting"></i>
+            </div>
+            <div class="brand-text-wrap">
+                <span class="brand-name">SignBridge</span>
+                <small class="brand-tagline">Accessible Communication</small>
+            </div>
+        </div>
+
+        <h1 class="title signup-title">Create Account</h1>
+        <p class="subtitle signup-subtitle">Join SignBridge and start your journey today.</p>
+
+        <form method="post" id="signupForm">
+            {% csrf_token %}
+
+            <div class="row g-2">
+                <!-- Full Name -->
+                <div class="col-md-8">
+                    <div class="field-wrap mb-0 animate-up delay-1">
+                        <label for="name" class="field-label">Full Name</label>
+                        <div class="input-shell compact-input">
+                            <span class="input-icon"><i class="fa-regular fa-user"></i></span>
+                            <input id="name" type="text" name="name" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-4">
+                    <div class="field-wrap mb-0 animate-up delay-2">
+                        <label for="age" class="field-label">Age</label>
+                        <div class="input-shell compact-input">
+                            <span class="input-icon"><i class="fa-regular fa-calendar"></i></span>
+                            <input id="age" type="tel" name="age" class="form-control" placeholder="Age" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="field-wrap mt-3 animate-up delay-3">
+                <label class="field-label">Gender</label>
+                <div class="gender-wrap">
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="Male" required>
+                        <span class="gender-inner">
+                            <i class="fa-solid fa-mars"></i>
+                            <span>Male</span>
+                        </span>
+                    </label>
+
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="Female">
+                        <span class="gender-inner">
+                            <i class="fa-solid fa-venus"></i>
+                            <span>Female</span>
+                        </span>
+                    </label>
+
+                    <label class="gender-card">
+                        <input type="radio" name="gender" value="Other">
+                        <span class="gender-inner">
+                            <i class="fa-solid fa-mercury"></i>
+                            <span>Other</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field-wrap animate-up delay-4">
+                <label for="email" class="field-label">Email</label>
+                <div class="input-shell compact-input">
+                    <span class="input-icon"><i class="fa-regular fa-envelope"></i></span>
+                    <input id="email" type="email" name="email" class="form-control" placeholder="Enter your email address" required>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="field-wrap animate-up delay-5">
+                <label for="passwordField" class="field-label">Password</label>
+                <div class="input-shell compact-input">
+                    <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" id="passwordField" name="password" class="form-control"
+                        placeholder="Create a secure password" required>
+                    <button type="button" class="toggle-btn" onclick="togglePassword()" aria-label="Toggle password visibility">
+                        <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-premium compact-btn mt-2 animate-up delay-6">Create Account</button>
+
+            <div class="auth-footer compact-footer animate-up delay-7">
+                Already have an account? <a href="/">Login</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+    /* ===== FULL SCREEN FIT SIGNUP ===== */
+
+    .auth-shell {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: pageFade 0.8s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .signup-card {
+        width: min(100%, 470px);
+        padding: 20px 20px;
+        border-radius: 24px;
+        margin: auto;
+        animation: cardReveal 0.85s cubic-bezier(.22, 1, .36, 1), cardFloat 7s ease-in-out infinite 1s;
+        will-change: transform, opacity;
+    }
+
+    /* ===== BRAND ===== */
+    .compact-brand {
+        padding: 8px 14px 8px 10px;
+        gap: 10px;
+        margin-bottom: 14px;
+        border-radius: 18px;
+        width: fit-content;
+        animation: fadeUp 0.7s cubic-bezier(.22, 1, .36, 1) both;
+        animation-delay: .08s;
+    }
+
+    .compact-brand .brand-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        font-size: 1rem;
+        transition: transform .3s ease;
+    }
+
+    .compact-brand:hover .brand-icon {
+        transform: scale(1.05) rotate(-2deg);
+    }
+
+    .compact-brand .brand-name {
+        font-size: 1.28rem;
+    }
+
+    .compact-brand .brand-tagline {
+        font-size: 0.70rem;
+        margin-top: 1px;
+    }
+
+    /* ===== TITLE ===== */
+    .signup-title {
+        font-size: clamp(1.8rem, 3vw, 2.2rem);
+        margin-bottom: 4px;
+        line-height: 1.05;
+        animation: fadeUp 0.7s cubic-bezier(.22, 1, .36, 1) both;
+        animation-delay: .16s;
+    }
+
+    .signup-subtitle {
+        margin-bottom: 14px;
+        font-size: 0.88rem;
+        animation: fadeUp 0.7s cubic-bezier(.22, 1, .36, 1) both;
+        animation-delay: .24s;
+    }
+
+    /* ===== LABELS ===== */
+    .field-label {
+        font-size: .72rem;
+        margin: 0 0 6px 4px;
+        letter-spacing: .11em;
+        transition: color .25s ease, transform .25s ease;
+    }
+
+    /* ===== INPUTS ===== */
+    .compact-input {
+        min-height: 46px !important;
+        border-radius: 14px !important;
+        transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+        will-change: transform, box-shadow;
+    }
+
+    .compact-input::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.05), transparent);
+        transform: translateX(-120%);
+        transition: transform .7s ease;
+        pointer-events: none;
+    }
+
+    .compact-input:hover::after {
+        transform: translateX(120%);
+    }
+
+    .compact-input:hover {
+        transform: translateY(-1px);
+    }
+
+    .compact-input:focus-within {
+        transform: translateY(-1px) scale(1.005);
+    }
+
+    .compact-input .input-icon,
+    .compact-input .toggle-btn {
+        width: 44px;
+        transition: color .25s ease, transform .25s ease;
+    }
+
+    .compact-input:focus-within .input-icon,
+    .compact-input:focus-within .toggle-btn {
+        transform: scale(1.05);
+    }
+
+    .compact-input .form-control {
+        padding: 10px 4px 10px 0 !important;
+        font-size: .90rem;
+        transition: transform .2s ease;
+    }
+
+    .compact-input .form-control:focus {
+        transform: translateX(1px);
+    }
+
+    .compact-input .form-control::placeholder {
+        transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .compact-input .form-control:focus::placeholder {
+        opacity: .7;
+        transform: translateX(2px);
+    }
+
+    /* ===== SPACING ===== */
+    .field-wrap {
+        margin-bottom: 12px;
+    }
+
+    .row.g-2 {
+        --bs-gutter-x: 10px;
+        --bs-gutter-y: 8px;
+    }
+
+    /* ===== GENDER ===== */
+    .gender-wrap {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .gender-card {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .gender-card input {
+        display: none;
+    }
+
+    .gender-inner {
+        min-height: 46px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        color: rgba(238, 244, 255, .78);
+        font-weight: 600;
+        transition: .25s ease;
+        font-size: .90rem;
+        will-change: transform, box-shadow;
+    }
+
+    .gender-inner i {
+        font-size: .90rem;
+        opacity: .92;
+        transition: transform .25s ease;
+    }
+
+    .gender-card:hover .gender-inner {
+        background: rgba(255, 255, 255, .10);
+        transform: translateY(-1px);
+    }
+
+    .gender-card:hover .gender-inner i {
+        transform: scale(1.08);
+    }
+
+    .gender-card input:checked + .gender-inner {
+        background: rgba(124, 92, 255, .18);
+        border: 1px solid rgba(0, 212, 255, .38);
+        color: #fff;
+        box-shadow: 0 0 0 3px rgba(0, 212, 255, .10);
+        transform: scale(1.02);
+    }
+
+    /* ===== BUTTON ===== */
+    .compact-btn {
+        min-height: 46px !important;
+        border-radius: 14px !important;
+        font-size: .84rem;
+        letter-spacing: .06em;
+        margin-top: 2px !important;
+        transition: transform .28s ease, box-shadow .28s ease, opacity .25s ease;
+    }
+
+    .compact-btn:hover {
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    .compact-btn:active {
+        transform: scale(.985);
+    }
+
+    .compact-footer {
+        margin-top: 10px;
+        font-size: 0.86rem;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    .animate-up {
+        opacity: 0;
+        animation: fadeUp 0.75s cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+
+    .delay-1 { animation-delay: .30s; }
+    .delay-2 { animation-delay: .38s; }
+    .delay-3 { animation-delay: .46s; }
+    .delay-4 { animation-delay: .54s; }
+    .delay-5 { animation-delay: .62s; }
+    .delay-6 { animation-delay: .70s; }
+    .delay-7 { animation-delay: .78s; }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pageFade {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes cardReveal {
+        from {
+            opacity: 0;
+            transform: translateY(18px) scale(.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes cardFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    /* ===== TABLET ===== */
+    @media (max-width: 991.98px) {
+        .signup-card {
+            width: min(100%, 500px);
+            padding: 20px 18px;
+        }
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 575.98px) {
+        .auth-shell {
+            padding: 12px;
+            align-items: center;
+        }
+
+        .signup-card {
+            width: 100%;
+            padding: 18px 16px;
+            border-radius: 20px;
+        }
+
+        .compact-brand {
+            width: 100%;
+            max-width: 100%;
+            justify-content: flex-start;
+            border-radius: 18px;
+            margin-bottom: 12px;
+        }
+
+        .compact-brand .brand-name {
+            font-size: 1.18rem;
+        }
+
+        .compact-brand .brand-tagline {
+            font-size: 0.66rem;
+        }
+
+        .signup-title {
+            font-size: 1.65rem;
+        }
+
+        .signup-subtitle {
+            font-size: 0.82rem;
+            margin-bottom: 12px;
+        }
+
+        .field-label {
+            font-size: .68rem;
+            margin-bottom: 5px;
+        }
+
+        .compact-input {
+            min-height: 44px !important;
+            border-radius: 13px !important;
+        }
+
+        .compact-input .form-control {
+            font-size: .88rem;
+        }
+
+        .gender-wrap {
+            grid-template-columns: 1fr;
+            gap: 7px;
+        }
+
+        .gender-inner {
+            min-height: 44px;
+            border-radius: 13px;
+            font-size: .88rem;
+        }
+
+        .compact-btn {
+            min-height: 44px !important;
+            border-radius: 13px !important;
+            font-size: .82rem;
+        }
+
+        .compact-footer {
+            font-size: 0.82rem;
+            margin-top: 8px;
+        }
+    }
+
+    /* ===== SHORT HEIGHT SCREENS / SMALL LAPTOPS ===== */
+    @media (max-height: 800px) {
+        .auth-shell {
+            padding: 12px;
+        }
+
+        .signup-card {
+            padding: 18px 18px;
+        }
+
+        .compact-brand {
+            margin-bottom: 12px;
+        }
+
+        .signup-title {
+            font-size: 1.8rem;
+        }
+
+        .signup-subtitle {
+            margin-bottom: 12px;
+        }
+
+        .field-wrap {
+            margin-bottom: 10px;
+        }
+
+        .compact-input,
+        .gender-inner,
+        .compact-btn {
+            min-height: 44px !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('passwordField');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const isPassword = passwordField.type === 'password';
+
+        passwordField.type = isPassword ? 'text' : 'password';
+        eyeIcon.classList.toggle('fa-eye', !isPassword);
+        eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+
+        eyeIcon.style.transform = 'scale(0.86)';
+        setTimeout(() => {
+            eyeIcon.style.transform = 'scale(1)';
+        }, 140);
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function () {
+        const btn = this.querySelector('.btn-premium');
+        btn.style.transform = 'scale(0.985)';
+        btn.style.opacity = '0.92';
+    });
+</script>
+{% endblock %}
