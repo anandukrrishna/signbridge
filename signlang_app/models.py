@@ -22,7 +22,7 @@ class ComplaintTable(models.Model):
 
 class FeedbackTable(models.Model):
     feedback=models.CharField(max_length=100, blank=True, null=True)
-    rating=models.IntegerField(max_length=20, blank=True, null=True)
+    rating=models.IntegerField( blank=True, null=True)
     date=models.DateField(auto_now_add=True, blank=True, null=True)
     USERID=models.ForeignKey(UserTable,on_delete=models.CASCADE,null=True,blank=True)
 

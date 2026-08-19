@@ -178,7 +178,7 @@ class StartSignAnimationView(View):
     def get(self, request):
         print("Starting sign animation frontend...")
 
-        project_path = r"D:\SIGN-LANG\sign_language\sign_animation"
+        project_path = r"D:\signbridge\sign_language\sign_animation"
         frontend_url = "http://localhost:4200/"
 
         try:
